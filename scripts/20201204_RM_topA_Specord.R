@@ -3,7 +3,7 @@ options(stringsAsFactors=FALSE)
 
 expid <- "20201204_RM_topA"
 PATH <- "/mnt/synmibi/Studierende/DATA/Specord/"
-PATH <- "/data/synmibi/Specord"
+##PATH <- "/data/synmibi/Specord"
 
 in.path <- file.path(PATH,expid)
 out.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
