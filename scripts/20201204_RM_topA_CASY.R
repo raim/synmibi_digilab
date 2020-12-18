@@ -9,7 +9,7 @@ d2v <- function(x) (x/2)^3*pi *4/3
 
 expid <- "20201204_RM_topA"
 PATH <- "/mnt/synmibi/Studierende/DATA/CASY/"
-##PATH <- "/data/synmibi/CASY"
+PATH <- "/data/synmibi/CASY"
 
 in.path <- file.path(PATH,expid)
 out.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
@@ -47,12 +47,16 @@ for ( i in seq_along(files) ) {
     
     ## number of cycles: total cell counts need to be divided by this
     cycles <- as.numeric(data[which(data[,1]=="Cycles"),2])
+    volume <- as.numeric(data[which(data[,1]=="Sample Volume (\xb5l)"),2])
     
     from <- which(data[,1]=="Size Channel")+1
     to <- which(data[,1]=="Counts Repeat 1")-1
     dat <- data[from:to,]
 
-    counts[,i] <- as.numeric(dat[,2])/cycles * dil
+    ## TODO: urgently check how Cycles are interpreted,
+    ## but it seems that measurements with less then
+    ## require to be scaled up to 3
+    counts[,i] <- as.numeric(dat[,2]) * dil /(cycles*volume/1000)
     sizes[,i] <- as.numeric(gsub(" ","",dat[,1]))
     #plot(dat, type="l")
 }
@@ -117,14 +121,14 @@ axis(2)
 box()
 par(new=TRUE)
 plot(1:ncol(counts), total/1e8, type="p",col=2,
-     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,3),
+     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,8),
      xlim=par("usr")[1:2],pch=19)
 lines(1:ncol(counts), total/1e8,col=2)
 axis(4,col=2,col.axis=2)
 mtext("1e8 cells/mL",4, par("mgp")[1],col=2)
 par(new=TRUE)
 plot(1:ncol(counts), volume, type="p",col="white",
-     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,2),
+     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,4),
      xlim=par("usr")[1:2],pch=3,lwd=2)
 lines(1:ncol(counts), volume,col="white")
 axis(2,col="black",col.axis="black",line=par("mgp")[1]*2)
@@ -138,7 +142,7 @@ sample.cols <- rev(viridis::viridis(ncol(counts)))
 #png(paste0(expid,"_raw.png"), width=400, height=200)
 #par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
 matplot(d2v(size), counts,type="l",lty=1,xlim=c(0,30),
-        col=sample.cols,xlab=expression("cell volume, "*fL),ylim=c(0,.5e7))
+        col=sample.cols,xlab=expression("cell volume, "*fL),ylim=c(0,1.5e7))
 legend("topright", sampleLabels, col=sample.cols,
        lty=1,y.intersp=.6,cex=.6,bty="n")
 dev.off()
