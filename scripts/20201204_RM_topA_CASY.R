@@ -38,28 +38,33 @@ sampleIDs <- rep(NA, length(files))
 for ( i in seq_along(files) ) {
     file.name <- files[i]
     data <- read.delim(file.path(in.path, file.name),header=FALSE)
+
+    ## comment contains sample ID
     comment <- toupper(data[which(data[,1]=="Comment 1"),2])
 
     cat(paste("parsing", comment, "\n"))
     sampleIDs[i] <- comment
     
+    ## number of cycles: total cell counts need to be divided by this
+    cycles <- as.numeric(data[which(data[,1]=="Cycles"),2])
+    
     from <- which(data[,1]=="Size Channel")+1
     to <- which(data[,1]=="Counts Repeat 1")-1
     dat <- data[from:to,]
 
-    counts[,i] <- as.numeric(dat[,2])*dil
+    counts[,i] <- as.numeric(dat[,2])/cycles * dil
     sizes[,i] <- as.numeric(gsub(" ","",dat[,1]))
     #plot(dat, type="l")
 }
 
 ## filter data
 filter <- grep("SAMPLE",sampleIDs)
-filter <- filter[grep("_[A-Z]", sampleIDs[filter], invert=TRUE)]
+#filter <- filter[grep("_[A-Z]", sampleIDs[filter], invert=TRUE)]
 counts <- counts[,filter]
 sizes <- sizes[,filter]
 sampleIDs <- sampleIDs[filter]
 
-sampleLabels <- sub(" .*","",sub("SAMPLE_","",sampleIDs))
+sampleLabels <- sub("_[A-Z].*","",sub(" .*","",sub("SAMPLE_","",sampleIDs)))
 
 ## check that all sizes are the same
 if ( unique(apply(sizes,1,function(x) length(unique(x))))!=1 )
@@ -105,21 +110,21 @@ png(file.path(out.path,paste0(expid,"_CASY.png")),
     width=2*3.5, height=2*3.5, units="in", res=300)
 par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
 image(y=d2v(size[idx]),x=1:ncol(counts),z=t(counts.nrm), col=cols,breaks=brks,
-      ylab=expression("cell volume, "*fL), xlab="",ylim=c(0,30),
+      ylab=expression("cell volume, "*fL), xlab="",ylim=c(0,15),
       axes=FALSE)
 axis(1, at=1:ncol(counts), label=sampleLabels,las=2)
 axis(2)
 box()
 par(new=TRUE)
 plot(1:ncol(counts), total/1e8, type="p",col=2,
-     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,11),
+     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,3),
      xlim=par("usr")[1:2],pch=19)
 lines(1:ncol(counts), total/1e8,col=2)
 axis(4,col=2,col.axis=2)
 mtext("1e8 cells/mL",4, par("mgp")[1],col=2)
 par(new=TRUE)
 plot(1:ncol(counts), volume, type="p",col="white",
-     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,6.5),
+     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,2),
      xlim=par("usr")[1:2],pch=3,lwd=2)
 lines(1:ncol(counts), volume,col="white")
 axis(2,col="black",col.axis="black",line=par("mgp")[1]*2)
@@ -133,7 +138,7 @@ sample.cols <- rev(viridis::viridis(ncol(counts)))
 #png(paste0(expid,"_raw.png"), width=400, height=200)
 #par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
 matplot(d2v(size), counts,type="l",lty=1,xlim=c(0,30),
-        col=sample.cols,xlab=expression("cell volume, "*fL),ylim=c(0,1.5e7))
+        col=sample.cols,xlab=expression("cell volume, "*fL),ylim=c(0,.5e7))
 legend("topright", sampleLabels, col=sample.cols,
        lty=1,y.intersp=.6,cex=.6,bty="n")
 dev.off()
