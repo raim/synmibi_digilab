@@ -46,17 +46,20 @@ for ( i in seq_along(files) ) {
     sampleIDs[i] <- comment
     
     ## number of cycles: total cell counts need to be divided by this
+    ## cell count correction factor
+    ## TODO: urgently check how Cycles, Sample Volume and Volume Correction
+    ##       are interpreted.
     cycles <- as.numeric(data[which(data[,1]=="Cycles"),2])
     volume <- as.numeric(data[which(data[,1]=="Sample Volume (\xb5l)"),2])
-    
+    volcor <- as.numeric(data[which(data[,1]=="Volume Correction"),2])
+
+    corr <- dil /(cycles*volume*volcor/1000)
+
     from <- which(data[,1]=="Size Channel")+1
     to <- which(data[,1]=="Counts Repeat 1")-1
     dat <- data[from:to,]
 
-    ## TODO: urgently check how Cycles are interpreted,
-    ## but it seems that measurements with less then
-    ## require to be scaled up to 3
-    counts[,i] <- as.numeric(dat[,2]) * dil /(cycles*volume/1000)
+    counts[,i] <- as.numeric(dat[,2]) * corr
     sizes[,i] <- as.numeric(gsub(" ","",dat[,1]))
     #plot(dat, type="l")
 }
