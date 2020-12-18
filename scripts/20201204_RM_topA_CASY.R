@@ -9,7 +9,8 @@ d2v <- function(x) (x/2)^3*pi *4/3
 
 expid <- "20201204_RM_topA"
 PATH <- "/mnt/synmibi/Studierende/DATA/CASY/"
-PATH <- "/data/synmibi/CASY"
+if ( Sys.info()["nodename"]=="intron" )
+    PATH <- "/data/synmibi/CASY"
 
 in.path <- file.path(PATH,expid)
 out.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
