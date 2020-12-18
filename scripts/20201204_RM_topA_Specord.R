@@ -67,10 +67,10 @@ legend("bottomleft",smp, col=cols,lty=ltys,lwd=2, cex=.75,
 axis(3, labels=NA, tcl=.25)
 mtext("wavelength, nm", 3, 0)
 matplot(x=wl,t(rspc2),type="l",lwd=2,lty=ltys,col=cols,
-        xlab=NA,ylab=bquote(ratio~A[coor]/A[.(REF)]))
+        xlab=NA,ylab=bquote(ratio~A[coor]/A[.(REF)]),ylim=c(.5,1.25))
 axis(3, labels=NA, tcl=.25)
 matplot(x=wl,t(rspc),type="l",lwd=2,lty=ltys,col=cols,
-        xlab=NA,ylab=bquote(ratio~A[norm]/A[.(REF)]))
+        xlab=NA,ylab=bquote(ratio~A[norm]/A[.(REF)]),ylim=c(.5,1.25))
 axis(3, labels=NA, tcl=.25)
 mtext("wavelength, nm", 3, 0)
 dev.off()
