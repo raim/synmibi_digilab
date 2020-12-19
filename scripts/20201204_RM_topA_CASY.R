@@ -148,6 +148,7 @@ sample.cols <- rev(viridis::viridis(ncol(counts)))
 matplot(d2v(size), counts,type="l",lty=1,xlim=c(0,30),
         col=sample.cols,xlab=expression("cell volume, "*fL),ylim=c(0,1.5e7))
 legend("topright", sampleLabels, col=sample.cols,
-       lty=1,y.intersp=.6,cex=.6,bty="n")
+       lty=1,y.intersp=.6,cex=.6,bty="n",
+       ncol=ifelse(length(sampleLabels)>12,2,1))
 dev.off()
 
