@@ -11,6 +11,8 @@ out.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
                       expid,"analysis")
 
 
+cat(paste("PARSING SPECORD DATA:", date(), "\n"))
+
 ## switch between normalization wavelengths
 nrm <-443 # 684 # NULL # # reference wavelength for normalization
 REF <- "SAMPLE_07" # as.character(7) ## reference sample

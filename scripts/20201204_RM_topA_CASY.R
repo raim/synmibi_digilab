@@ -16,6 +16,10 @@ in.path <- file.path(PATH,expid)
 out.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
                       expid,"analysis")
 
+cat(paste("PARSING CASY DATA:", date(), "\n"))
+
+
+
 ## experiment parameters
 dil <- 4000
 
