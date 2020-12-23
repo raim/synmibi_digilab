@@ -122,7 +122,7 @@ png(file.path(out.path,paste0(expid,"_CASY.png")),
     width=2*3.5, height=2*3.5, units="in", res=300)
 par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
 image(y=d2v(size[idx]),x=1:ncol(counts),z=t(counts.nrm), col=cols,breaks=brks,
-      ylab=expression("cell volume, "*fL), xlab="",ylim=c(0,15),
+      ylab=expression("cell volume, "*fL), xlab="",ylim=c(0,25),
       axes=FALSE)
 axis(1, at=1:ncol(counts), label=sampleLabels,las=2)
 axis(2)
