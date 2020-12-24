@@ -18,7 +18,12 @@ out.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
 
 cat(paste("PARSING CASY DATA:", date(), "\n"))
 
+## SAMPLE NOTES AND SETTINGS
 
+## SAMPLE_27: original sample clogged CASY, cells were washed,
+## OD decreased from 0,64 to 0,60 -> use this OD change as a factor
+## to correct cell counts?
+## 
 
 ## experiment parameters
 dil <- 4000

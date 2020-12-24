@@ -28,11 +28,18 @@ rownames(spc) <- smp
 ## load spectra from Specord
 for ( i in seq_along(files) ) {
     dat <- read.csv(file.path(in.path,files[i]), sep=";",skip=1)
-    dat <- dat[,grep("SAMPLE",colnames(dat))]
-    spc[i,] <- dat 
+    idx <- grep("SAMPLE",colnames(dat))
+    if ( length(idx)==1 ) {
+        dat <- dat[,idx]
+        spc[i,] <- dat
+    }
 }
 
-   
+## remove NA samples
+rm <- apply(spc,1,function(x) any(is.na(x)))
+smp <- smp[!rm]
+spc <- spc[!rm,]
+
 ## sample colors
 cols <- sub("FF$","99",rev(viridis::viridis(nrow(spc))))
 ltys <- rep(c(1,2), length(cols)/2)
@@ -69,10 +76,10 @@ legend("bottomleft",smp, col=cols,lty=ltys,lwd=2, cex=.75,
 axis(3, labels=NA, tcl=.25)
 mtext("wavelength, nm", 3, 0)
 matplot(x=wl,t(rspc2),type="l",lwd=2,lty=ltys,col=cols,
-        xlab=NA,ylab=bquote(ratio~A[coor]/A[.(REF)]),ylim=c(.5,1.25))
+        xlab=NA,ylab=bquote(ratio~A[coor]/A[.(REF)]),ylim=c(0,1.2))
 axis(3, labels=NA, tcl=.25)
 matplot(x=wl,t(rspc),type="l",lwd=2,lty=ltys,col=cols,
-        xlab=NA,ylab=bquote(ratio~A[norm]/A[.(REF)]),ylim=c(.5,1.25))
+        xlab=NA,ylab=bquote(ratio~A[norm]/A[.(REF)]),ylim=c(.5,1.5))
 axis(3, labels=NA, tcl=.25)
 mtext("wavelength, nm", 3, 0)
 dev.off()
