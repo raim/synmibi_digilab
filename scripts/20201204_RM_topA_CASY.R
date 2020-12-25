@@ -117,10 +117,12 @@ counts.nrm <- counts[idx,] # apply(counts[idx,],2,function(x) x/max(x))
 if ( normalize ) {
     counts.nrm <-apply(counts[idx,],2,function(x) x/max(x))
     brks <- brks/max(brks)
+    counts.all <-apply(counts,2,function(x) x/max(x))
 }
 
 ## moving average of counts
 counts.nrm <- apply(counts.nrm,2,ma)
+counts.all <- apply(counts.all,2,ma)
 
 
 png(file.path(out.path,paste0(expid,"_CASY.png")),
@@ -156,6 +158,46 @@ sample.cols <- rev(viridis::viridis(ncol(counts)))
 #par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
 matplot(d2v(size), counts,type="l",lty=1,xlim=c(0,30),
         col=sample.cols,xlab=expression("cell volume, "*fL),ylim=c(0,1.5e7))
+legend("topright", sampleLabels, col=sample.cols,
+       lty=1,y.intersp=.6,cex=.6,bty="n",
+       ncol=ifelse(length(sampleLabels)>12,2,1))
+dev.off()
+
+
+
+png(file.path(out.path,paste0(expid,"_CASY_diameter.png")),
+    width=2*3.5, height=2*3.5, units="in", res=300)
+par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
+image(y=size,x=1:ncol(counts),z=t(counts.all), col=cols,breaks=brks,
+      ylab=expression("cell diameter, "*mu*m), xlab="",ylim=c(0,4),
+      axes=FALSE)
+axis(1, at=1:ncol(counts), label=sampleLabels,las=2)
+axis(2)
+box()
+par(new=TRUE)
+plot(1:ncol(counts), total/1e8, type="p",col=2,
+     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,8),
+     xlim=par("usr")[1:2],pch=19)
+lines(1:ncol(counts), total/1e8,col=2)
+axis(4,col=2,col.axis=2)
+mtext("1e8 cells/mL",4, par("mgp")[1],col=2)
+par(new=TRUE)
+plot(1:ncol(counts), volume, type="p",col="white",
+     axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,4),
+     xlim=par("usr")[1:2],pch=3,lwd=2)
+lines(1:ncol(counts), volume,col="white")
+axis(2,col="black",col.axis="black",line=par("mgp")[1]*2)
+mtext(expression("total cell volume, "*mu*L/mL),2, 3*par("mgp")[1],col="black")
+legend("topleft",c("cell count","total cell volume"),pch=c(19,3),
+       col=c("red","white"),bty="n",text.col="white",pt.lwd=c(1,2))
+#dev.off()
+
+sample.cols <- rev(viridis::viridis(ncol(counts)))
+
+#png(paste0(expid,"_raw.png"), width=400, height=200)
+#par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
+matplot(size, counts,type="l",lty=1,xlim=c(0,4),
+        col=sample.cols,xlab=expression("cell diameter, "*mu*m),ylim=c(0,1.5e7))
 legend("topright", sampleLabels, col=sample.cols,
        lty=1,y.intersp=.6,cex=.6,bty="n",
        ncol=ifelse(length(sampleLabels)>12,2,1))

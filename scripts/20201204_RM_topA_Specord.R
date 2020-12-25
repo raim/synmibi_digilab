@@ -27,7 +27,8 @@ rownames(spc) <- smp
 
 ## load spectra from Specord
 for ( i in seq_along(files) ) {
-    dat <- read.csv(file.path(in.path,files[i]), sep=";",skip=1)
+    dat <- try(read.csv(file.path(in.path,files[i]), sep=";",skip=1))
+    if ( inherits(dat, 'try-error')) next
     idx <- grep("SAMPLE",colnames(dat))
     if ( length(idx)==1 ) {
         dat <- dat[,idx]
