@@ -27,6 +27,7 @@ cat(paste("PARSING CASY DATA:", date(), "\n"))
 
 ## experiment parameters
 dil <- 4000
+undil <- 1000 # "UNDILUTED"
 
 ## analysis&plot parameters
 normalize <- TRUE
@@ -54,6 +55,10 @@ for ( i in seq_along(files) ) {
 
     cat(paste("parsing", comment, "\n"))
     sampleIDs[i] <- comment
+
+    DIL <- dil
+    if ( length(grep("UNDILUTED",sampleIDs[i]))>0 )
+        DIL <- undil
     
     ## number of cycles: total cell counts need to be divided by this
     ## cell count correction factor
@@ -63,7 +68,7 @@ for ( i in seq_along(files) ) {
     volume <- as.numeric(data[which(data[,1]=="Sample Volume (\xb5l)"),2])
     volcor <- as.numeric(data[which(data[,1]=="Volume Correction"),2])
 
-    corr <- dil /(cycles*volume*volcor/1000)
+    corr <- DIL /(cycles*volume*volcor/1000)
 
     from <- which(data[,1]=="Size Channel")+1
     to <- which(data[,1]=="Counts Repeat 1")-1
