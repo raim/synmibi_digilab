@@ -129,7 +129,7 @@ png(file.path(out.path,paste0(expid,"_CASY.png")),
     width=2*3.5, height=2*3.5, units="in", res=300)
 par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
 image(y=d2v(size[idx]),x=1:ncol(counts),z=t(counts.nrm), col=cols,breaks=brks,
-      ylab=expression("cell volume, "*fL), xlab="",ylim=c(0,25),
+      ylab=expression("cell volume, "*fL), xlab="",ylim=c(0,35),
       axes=FALSE)
 axis(1, at=1:ncol(counts), label=sampleLabels,las=2)
 axis(2)
@@ -156,7 +156,7 @@ sample.cols <- rev(viridis::viridis(ncol(counts)))
 
 #png(paste0(expid,"_raw.png"), width=400, height=200)
 #par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
-matplot(d2v(size), counts,type="l",lty=1,xlim=c(0,30),
+matplot(d2v(size), counts,type="l",lty=1,xlim=c(0,35),
         col=sample.cols,xlab=expression("cell volume, "*fL),ylim=c(0,1.5e7))
 legend("topright", sampleLabels, col=sample.cols,
        lty=1,y.intersp=.6,cex=.6,bty="n",
@@ -169,7 +169,7 @@ png(file.path(out.path,paste0(expid,"_CASY_diameter.png")),
     width=2*3.5, height=2*3.5, units="in", res=300)
 par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
 image(y=size,x=1:ncol(counts),z=t(counts.all), col=cols,breaks=brks,
-      ylab=expression("cell diameter, "*mu*m), xlab="",ylim=c(0,4),
+      ylab=expression("cell diameter, "*mu*m), xlab="",ylim=c(0,5),
       axes=FALSE)
 axis(1, at=1:ncol(counts), label=sampleLabels,las=2)
 axis(2)
@@ -196,7 +196,7 @@ sample.cols <- rev(viridis::viridis(ncol(counts)))
 
 #png(paste0(expid,"_raw.png"), width=400, height=200)
 #par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
-matplot(size, counts,type="l",lty=1,xlim=c(0,4),
+matplot(size, counts,type="l",lty=1,xlim=c(0,5),
         col=sample.cols,xlab=expression("cell diameter, "*mu*m),ylim=c(0,1.5e7))
 legend("topright", sampleLabels, col=sample.cols,
        lty=1,y.intersp=.6,cex=.6,bty="n",
