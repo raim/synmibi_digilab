@@ -48,7 +48,9 @@ sizes <- counts <- matrix(NA, nrow=1024, ncol=length(files))
 sampleIDs <- rep(NA, length(files))
 for ( i in seq_along(files) ) {
     file.name <- files[i]
-    data <- read.delim(file.path(in.path, file.name),header=FALSE)
+    data <- try(read.delim(file.path(in.path, file.name),header=FALSE))
+
+    if ( inherits(data, 'try-error') ) next
 
     ## comment contains sample ID
     comment <- toupper(data[which(data[,1]=="Comment 1"),2])
