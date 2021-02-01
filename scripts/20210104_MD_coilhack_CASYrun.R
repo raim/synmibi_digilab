@@ -21,8 +21,17 @@ cat(paste("PARSING CASY DATA:", date(), "\n"))
 ## SAMPLE NOTES AND SETTINGS
 
 ## experiment parameters
-dil <- 3000
+dil <- 1000
 undil <- NA
+
+dils <- list()
+dils[["EVC"]] <- 5000
+dils[["TOPAKD"]] <- 5000
+dil2 <- 5000 # after recovery
+
+## evc und topA KD war glaub ich immer 1:5000 verdünnt
+## die anderen haben wir zunächst nur 1:1000 verdünnt,
+## sobald die recovered sind dann auch 1:5000
 
 ## analysis&plot parameters
 normalize <- TRUE
@@ -40,7 +49,8 @@ max.norm <- max.counts
 files <- list.files(path=in.path, pattern="coilhack_001_.*\\.TXT$")
 
 sizes <- counts <- matrix(NA, nrow=1024, ncol=length(files))
-sampleIDs <- rep(NA, length(files))
+sampleIDs <-  rep(NA, length(files))
+times <- rep(list(NA), length(files))
 for ( i in seq_along(files) ) {
 
     file.name <- files[i]
@@ -57,6 +67,11 @@ for ( i in seq_along(files) ) {
     DIL <- dil
     if ( length(grep("UNDILUTED",sampleIDs[i]))>0 )
         DIL <- undil
+    ## TODO: search correct dilution
+
+    ## time
+    times[[i]] <- strptime(paste(data[7,2],data[8,2]),
+                           format="%d.%m.%y %H:%M:%S")
     
     ## number of cycles: total cell counts need to be divided by this
     ## cell count correction factor
@@ -83,6 +98,7 @@ filter <- grep("^EXP",sampleIDs)
 counts <- counts[,filter]
 sizes <- sizes[,filter]
 sampleIDs <- sampleIDs[filter]
+times <-times[filter]
 
 ## TODO:
 ## * split into experiments (simple: set ID above and run script separately),
@@ -146,33 +162,38 @@ for ( i in 1:length(RUNS) ) {
     run <- RUNS[i]
     rid <- which(sampleRuns==run)
 
-    ## loop through duplicates!
+    ## TODO: loop through duplicates!
     cnts <- counts[,rid]
     cnts.nrm <- counts.nrm[,rid]
     cnts.all <- counts.all[,rid]
 
+    ## sample times
+    xtime <- times[rid]
+    xtime <- unlist(lapply(xtime, function(x)
+        difftime(x,xtime[[1]],units="days")))
+    
     file.name <- file.path(out.path,paste0(expid,"_CASY_",run))
 
     png(paste0(file.name,"_volume.png"),
-        width=2*3.5, height=2*3.5, units="in", res=300)
-    par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,
+        width=2*3.5, height=3.5, units="in", res=300)
+    par(mfcol=c(1,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,
         xaxs="i",yaxs="i")
-    image(y=d2v(size[idx]),x=1:ncol(cnts),z=t(cnts.nrm),
+    image(y=d2v(size[idx]),x=xtime,z=t(cnts.nrm),
           col=cols,breaks=brks,
           ylab=expression("cell volume, "*fL), xlab="",ylim=c(0,35),
           axes=FALSE)
-    axis(1, at=1:ncol(cnts), label=sampleLabels[rid],las=2,cex.axis=.7)
+    axis(1)#, at=1:ncol(cnts), label=sampleLabels[rid],las=2,cex.axis=.7)
     axis(2)
     box()
     par(new=TRUE)
-    plot(1:ncol(cnts), total[rid]/1e8, type="p",col=2,
+    plot(xtime, total[rid]/1e8, type="p",col=2,
          axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,8),
          xlim=par("usr")[1:2],pch=1)
     ##lines(1:ncol(cnts), total/1e8,col=2)
     axis(4,col=2,col.axis=2)
     mtext("1e8 cells/mL",4, par("mgp")[1],col=2)
     par(new=TRUE)
-    plot(1:ncol(cnts), volume[rid], type="p",col="white",
+    plot(xtime, volume[rid], type="p",col="white",
          axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,4),
          xlim=par("usr")[1:2],pch=5,lwd=1)
     ##lines(1:ncol(cnts), volume,col="white")
@@ -181,12 +202,13 @@ for ( i in 1:length(RUNS) ) {
           3*par("mgp")[1],col="black")
     legend("topleft",c("cell count","total cell volume"),pch=c(1,5),
            col=c("red","white"),bty="n",text.col="white",pt.lwd=c(1,1))
-    ##dev.off()
+    dev.off()
     
     sample.cols <- rev(viridis::viridis(ncol(cnts)))
     
-    ##png(paste0(expid,"_raw.png"), width=400, height=200)
-    ##par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
+    png(paste0(file.name,"_volume_raw.png"), 
+        width=2*3.5, height=3.5, units="in", res=300)
+    par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
     matplot(d2v(size), cnts,type="l",lty=1,xlim=c(0,35),
         col=sample.cols,xlab=expression("cell volume, "*fL),ylim=c(0,1.5e7))
     legend("topright", sampleLabels[rid], col=sample.cols,
@@ -197,24 +219,24 @@ for ( i in 1:length(RUNS) ) {
     
     
     png(paste0(file.name,"_diameter.png"),
-        width=2*3.5, height=2*3.5, units="in", res=300)
-    par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,
+        width=2*3.5, height=3.5, units="in", res=300)
+    par(mfcol=c(1,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,
         xaxs="i",yaxs="i")
-    image(y=size,x=1:ncol(cnts),z=t(cnts.all), col=cols,breaks=brks,
+    image(y=size,x=xtime,z=t(cnts.all), col=cols,breaks=brks,
           ylab=expression("cell diameter, "*mu*m), xlab="",ylim=c(0,5),
           axes=FALSE)
-    axis(1, at=1:ncol(cnts), label=sampleLabels[rid],las=2,cex.axis=.7)
+    axis(1)#, at=1:ncol(cnts), label=sampleLabels[rid],las=2,cex.axis=.7)
     axis(2)
     box()
     par(new=TRUE)
-    plot(1:ncol(cnts), total[rid]/1e8, type="p",col=2,
+    plot(xtime, total[rid]/1e8, type="p",col=2,
          axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,8),
          xlim=par("usr")[1:2],pch=1)
 #lines(1:ncol(cnts), total/1e8,col=2)
     axis(4,col=2,col.axis=2)
     mtext("1e8 cells/mL",4, par("mgp")[1],col=2)
     par(new=TRUE)
-    plot(1:ncol(cnts), volume[rid], type="p",col="white",
+    plot(xtime, volume[rid], type="p",col="white",
          axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,4),
          xlim=par("usr")[1:2],pch=5,lwd=1)
 #lines(1:ncol(cnts), volume,col="white")
@@ -222,14 +244,16 @@ for ( i in 1:length(RUNS) ) {
     mtext(expression("total cell volume, "*mu*L/mL),2, 3*par("mgp")[1],col="black")
     legend("topleft",c("cell count","total cell volume"),pch=c(1,5),
            col=c("red","white"),bty="n",text.col="white",pt.lwd=c(1,1))
-    ##dev.off()
+    dev.off()
     
     sample.cols <- rev(viridis::viridis(ncol(cnts)))
 
-#png(paste0(expid,"_raw.png"), width=400, height=200)
-#par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
+    png(paste0(file.name,"_diameter_raw.png"), 
+        width=2*3.5, height=3.5, units="in", res=300)
+    par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
     matplot(size, cnts,type="l",lty=1,xlim=c(0,5),
-            col=sample.cols,xlab=expression("cell diameter, "*mu*m),ylim=c(0,1.5e7))
+            col=sample.cols,xlab=expression("cell diameter, "*mu*m),
+            ylim=c(0,1.5e7))
     legend("topright", sampleLabels[rid], col=sample.cols,
            lty=1,y.intersp=.6,cex=.6,bty="n",
            ncol=max(c(1,round(length(sampleLabels[rid])/20))))

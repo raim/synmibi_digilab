@@ -46,6 +46,7 @@ files <- list.files(path=in.path, pattern="measurement_.*\\.TXT$")
 
 sizes <- counts <- matrix(NA, nrow=1024, ncol=length(files))
 sampleIDs <- rep(NA, length(files))
+times <- rep(list(NA), length(files))
 for ( i in seq_along(files) ) {
     file.name <- files[i]
     data <- try(read.delim(file.path(in.path, file.name),header=FALSE))
@@ -62,6 +63,10 @@ for ( i in seq_along(files) ) {
     if ( length(grep("UNDILUTED",sampleIDs[i]))>0 )
         DIL <- undil
     
+    ## time
+    times[[i]] <- strptime(paste(data[7,2],data[8,2]),
+                           format="%d.%m.%y %H:%M:%S")
+
     ## number of cycles: total cell counts need to be divided by this
     ## cell count correction factor
     ## TODO: urgently check how Cycles, Sample Volume and Volume Correction
@@ -87,6 +92,7 @@ filter <- grep("SAMPLE",sampleIDs)
 counts <- counts[,filter]
 sizes <- sizes[,filter]
 sampleIDs <- sampleIDs[filter]
+times <-times[filter]
 
 sampleLabels <- sub("_[A-Z].*","",sub(" .*","",sub("SAMPLE_","",sampleIDs)))
 
@@ -131,25 +137,29 @@ if ( normalize ) {
 counts.nrm <- apply(counts.nrm,2,ma)
 counts.all <- apply(counts.all,2,ma)
 
+## sample times
+xtime <- unlist(lapply(times, function(x)
+    difftime(x,times[[1]],units="days")))
 
 png(file.path(out.path,paste0(expid,"_CASY.png")),
     width=2*3.5, height=2*3.5, units="in", res=300)
 par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
-image(y=d2v(size[idx]),x=1:ncol(counts),z=t(counts.nrm), col=cols,breaks=brks,
+image(y=d2v(size[idx]),xtime,z=t(counts.nrm), col=cols,breaks=brks,
       ylab=expression("cell volume, "*fL), xlab="",ylim=c(0,35),
       axes=FALSE)
-axis(1, at=1:ncol(counts), label=sampleLabels,las=2,cex.axis=.7)
+axis(1)#, at=1:ncol(counts), label=sampleLabels,las=2,cex.axis=.7)
+axis(3, at=xtime, label=NA)
 axis(2)
 box()
 par(new=TRUE)
-plot(1:ncol(counts), total/1e8, type="p",col=2,
+plot(xtime, total/1e8, type="p",col=2,
      axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,8),
      xlim=par("usr")[1:2],pch=1)
 #lines(1:ncol(counts), total/1e8,col=2)
 axis(4,col=2,col.axis=2)
 mtext("1e8 cells/mL",4, par("mgp")[1],col=2)
 par(new=TRUE)
-plot(1:ncol(counts), volume, type="p",col="white",
+plot(xtime, volume, type="p",col="white",
      axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,4),
      xlim=par("usr")[1:2],pch=5,lwd=1)
 #lines(1:ncol(counts), volume,col="white")
@@ -175,21 +185,23 @@ dev.off()
 png(file.path(out.path,paste0(expid,"_CASY_diameter.png")),
     width=2*3.5, height=2*3.5, units="in", res=300)
 par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
-image(y=size,x=1:ncol(counts),z=t(counts.all), col=cols,breaks=brks,
+image(y=size,xtime,z=t(counts.all), col=cols,breaks=brks,
       ylab=expression("cell diameter, "*mu*m), xlab="",ylim=c(0,5),
       axes=FALSE)
-axis(1, at=1:ncol(counts), label=sampleLabels,las=2,cex.axis=.7)
+axis(1)#, at=1:ncol(counts), label=sampleLabels,las=2,cex.axis=.7)
+axis(3, at=xtime, label=NA)
+#axis(1, at=xtime, label=sampleLabels,las=2,cex.axis=.7, mgp=-par("mgp"))
 axis(2)
 box()
 par(new=TRUE)
-plot(1:ncol(counts), total/1e8, type="p",col=2,
+plot(xtime, total/1e8, type="p",col=2,
      axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,8),
      xlim=par("usr")[1:2],pch=1)
 #lines(1:ncol(counts), total/1e8,col=2)
 axis(4,col=2,col.axis=2)
 mtext("1e8 cells/mL",4, par("mgp")[1],col=2)
 par(new=TRUE)
-plot(1:ncol(counts), volume, type="p",col="white",
+plot(xtime, volume, type="p",col="white",
      axes=FALSE,xlab=NA,ylab=NA,ylim=c(0,4),
      xlim=par("usr")[1:2],pch=5,lwd=1)
 #lines(1:ncol(counts), volume,col="white")
@@ -210,3 +222,18 @@ legend("topright", sampleLabels, col=sample.cols,
        ncol=round(length(sampleLabels)/20))
 dev.off()
 
+
+## WRITE-OUT RESULTS
+## TODO: summarize duplicates,
+## TODO: write out count, total volume, peak volume
+colnames(counts) <- sampleIDs
+
+allc <- cbind(diameter=size, volume=d2v(size), counts)
+write.table(allc, file=file.path(out.path,paste0(expid,"_casy.tsv")),
+            quote=FALSE,sep="\t",row.names=FALSE)
+
+summary <- data.frame("sample"=sampleIDs,
+                      `cells/mL`=total, `volume,uL/mL`=volume,
+                      check.names=FALSE)
+write.table(summary, file=file.path(out.path,paste0(expid,"_casy_summary.tsv")),
+            quote=FALSE,sep="\t",row.names=FALSE)
