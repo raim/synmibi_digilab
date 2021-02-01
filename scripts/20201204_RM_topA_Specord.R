@@ -87,7 +87,8 @@ axis(3, labels=NA, tcl=.25)
 mtext("wavelength, nm", 3, 0)
 dev.off()
 
-colnames(spc) <- wl
-res <- cbind.data.frame(sample=rownames(spc), spc)
+## write-out original spectra
+colnames(ospc) <- wl
+res <- cbind.data.frame(sample=rownames(ospc), ospc)
 file.name <- file.path(dat.path,paste0(expid,"_Specord.tsv"))
 write.table(res, file=file.name, quote=FALSE, na="", sep="\t", row.names=FALSE)
