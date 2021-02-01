@@ -45,7 +45,7 @@ spc <- spc[!rm,]
 cols <- sub("FF$","99",rev(viridis::viridis(nrow(spc))))
 ltys <- rep(c(1,2), length(cols)/2)
 
-nspc <- spc
+ospc <- spc
     
 ## subtract 750 nm baseline
 spc <- spc - spc[,wl==750]
@@ -84,3 +84,8 @@ matplot(x=wl,t(rspc),type="l",lwd=2,lty=ltys,col=cols,
 axis(3, labels=NA, tcl=.25)
 mtext("wavelength, nm", 3, 0)
 dev.off()
+
+colnames(spc) <- wl
+res <- cbind.data.frame(sample=rownames(spc), spc)
+file.name <- file.path(out.path,paste0(expid,"_Specord.tsv"))
+write.table(res, file=file.name, quote=FALSE, na="", sep="\t", row.names=FALSE)
