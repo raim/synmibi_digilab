@@ -7,8 +7,10 @@ if ( Sys.info()["nodename"]=="intron" )
     PATH <- "/data/synmibi/Specord"
 
 in.path <- file.path(PATH,expid)
-out.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
+fig.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
                       expid,"analysis")
+dat.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
+                      expid,"offline")
 
 
 cat(paste("PARSING SPECORD DATA:", date(), "\n"))
@@ -63,7 +65,7 @@ rspc2 <- t(t(as.matrix(spc))/unlist(spc[smp==REF,]))
 ### PLOTS
     
 ##
-png(file.path(out.path,paste0(expid,"_Specord.png")),
+png(file.path(fig.path,paste0(expid,"_Specord.png")),
     units="in", height=2*3.5, width=2*3.5, res=200)
 par(mfcol=c(2,2),mai=c(.25,.35,.1,.1), mgp=c(1.1,.1,0), tcl=.25)
 matplot(x=wl,t(spc),type="l",lwd=2,lty=ltys,col=cols,
@@ -87,5 +89,5 @@ dev.off()
 
 colnames(spc) <- wl
 res <- cbind.data.frame(sample=rownames(spc), spc)
-file.name <- file.path(out.path,paste0(expid,"_Specord.tsv"))
+file.name <- file.path(dat.path,paste0(expid,"_Specord.tsv"))
 write.table(res, file=file.name, quote=FALSE, na="", sep="\t", row.names=FALSE)

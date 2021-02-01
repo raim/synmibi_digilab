@@ -13,8 +13,10 @@ if ( Sys.info()["nodename"]=="intron" )
     PATH <- "/data/synmibi/CASY"
 
 in.path <- file.path(PATH,expid)
-out.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
+fig.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
                       expid,"analysis")
+dat.path <- file.path("~/work/CoilHack/experiments/reactor/pcc6803/",
+                      expid,"offline")
 
 cat(paste("PARSING CASY DATA:", date(), "\n"))
 
@@ -154,7 +156,7 @@ counts.all <- apply(counts.all,2,ma)
 xtime <- unlist(lapply(times, function(x)
     difftime(x,times[[1]],units="days")))
 
-png(file.path(out.path,paste0(expid,"_CASY.png")),
+png(file.path(fig.path,paste0(expid,"_CASY.png")),
     width=2*3.5, height=2*3.5, units="in", res=300)
 par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
 image(y=d2v(size[idx]),xtime,z=t(counts.nrm), col=cols,breaks=brks,
@@ -195,7 +197,7 @@ dev.off()
 
 
 
-png(file.path(out.path,paste0(expid,"_CASY_diameter.png")),
+png(file.path(fig.path,paste0(expid,"_CASY_diameter.png")),
     width=2*3.5, height=2*3.5, units="in", res=300)
 par(mfcol=c(2,1),mai=c(.5,1,.1,.5),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
 image(y=size,xtime,z=t(counts.all), col=cols,breaks=brks,
@@ -242,12 +244,12 @@ dev.off()
 colnames(counts) <- sampleIDs
 
 allc <- cbind(diameter=size, volume=d2v(size), counts)
-write.table(allc, file=file.path(out.path,paste0(expid,"_casy.tsv")),
+write.table(allc, file=file.path(dat.path,paste0(expid,"_casy.tsv")),
             quote=FALSE,sep="\t",row.names=FALSE)
 
 summary <- data.frame("sample"=sampleIDs,
                       `cells/mL`=total, `volume,uL/mL`=volume,
                       check.names=FALSE)
 summary <- cbind.data.frame(summary, cvalues)
-write.table(summary, file=file.path(out.path,paste0(expid,"_casy_summary.tsv")),
+write.table(summary, file=file.path(dat.path,paste0(expid,"_casy_summary.tsv")),
             quote=FALSE,sep="\t",row.names=FALSE)
