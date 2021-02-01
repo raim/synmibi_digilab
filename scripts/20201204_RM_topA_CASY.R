@@ -44,8 +44,16 @@ max.norm <- max.counts
 
 files <- list.files(path=in.path, pattern="measurement_.*\\.TXT$")
 
+## size distributions
 sizes <- counts <- matrix(NA, nrow=1024, ncol=length(files))
-sampleIDs <- rep(NA, length(files))
+sampleIDs <- CNUM <- CVOL <- rep(NA, length(files))
+
+## precalculated values
+cvalues <- matrix(NA, nrow=length(files), ncol=c(6))
+colnames(cvalues) <- c("Counts/ml","Volume/ml",
+                       "Mean Volume (fl)", "Peak Volume (fl)",
+                       "Mean Diameter (\xb5m)","Peak Diameter (\xb5m)")
+## sampling times
 times <- rep(list(NA), length(files))
 for ( i in seq_along(files) ) {
     file.name <- files[i]
@@ -62,8 +70,12 @@ for ( i in seq_along(files) ) {
     DIL <- dil
     if ( length(grep("UNDILUTED",sampleIDs[i]))>0 )
         DIL <- undil
+
+    ## re-caculatd values
+    cvalues[i,] <- as.numeric(trimws(data[match(colnames(cvalues),data[,1]),2]))
+    cvalues[i,c("Counts/ml","Volume/ml")] <- cvalues[i,c("Counts/ml","Volume/ml")]*DIL
     
-    ## time
+    ## sample dates
     times[[i]] <- strptime(paste(data[7,2],data[8,2]),
                            format="%d.%m.%y %H:%M:%S")
 
@@ -93,6 +105,7 @@ counts <- counts[,filter]
 sizes <- sizes[,filter]
 sampleIDs <- sampleIDs[filter]
 times <-times[filter]
+cvalues <- cvalues[filter,]
 
 sampleLabels <- sub("_[A-Z].*","",sub(" .*","",sub("SAMPLE_","",sampleIDs)))
 
@@ -235,5 +248,6 @@ write.table(allc, file=file.path(out.path,paste0(expid,"_casy.tsv")),
 summary <- data.frame("sample"=sampleIDs,
                       `cells/mL`=total, `volume,uL/mL`=volume,
                       check.names=FALSE)
+summary <- cbind.data.frame(summary, cvalues)
 write.table(summary, file=file.path(out.path,paste0(expid,"_casy_summary.tsv")),
             quote=FALSE,sep="\t",row.names=FALSE)
