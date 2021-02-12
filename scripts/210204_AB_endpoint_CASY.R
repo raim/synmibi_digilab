@@ -22,13 +22,7 @@ cat(paste("PARSING CASY DATA:", date(), "\n"))
 ## SAMPLE NOTES AND SETTINGS
 
 ## experiment parameters
-dil <- 1000
-undil <- NA
-
-dils <- list()
-dils[["EVC"]] <- 5000
-dils[["TOPAKD"]] <- 5000
-dil2 <- 5000 # after recovery
+dil <- 3000
 
 ## evc und topA KD war glaub ich immer 1:5000 verdünnt
 ## die anderen haben wir zunächst nur 1:1000 verdünnt,
@@ -37,8 +31,8 @@ dil2 <- 5000 # after recovery
 ## analysis&plot parameters
 normalize <- TRUE
 max.cnt <- 10e6 # max cell count for color scheme breaks
-## size filter
-min.counts <- 1.5
+## size filter, min/max diameter to count
+min.counts <- 1#.5
 max.counts <- 5
 min.norm <- min.counts
 max.norm <- max.counts
