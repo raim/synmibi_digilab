@@ -73,7 +73,7 @@ for ( i in seq_along(files) ) {
     if ( length(grep("UNDILUTED",sampleIDs[i]))>0 )
         DIL <- undil
 
-    ## re-caculatd values
+    ## pre-caculated values
     cvalues[i,] <- as.numeric(trimws(data[match(colnames(cvalues),data[,1]),2]))
     cvalues[i,c("Counts/ml","Volume/ml")] <- cvalues[i,c("Counts/ml","Volume/ml")]*DIL
     
