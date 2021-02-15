@@ -32,7 +32,7 @@ dil <- 3000
 normalize <- TRUE
 max.cnt <- 10e6 # max cell count for color scheme breaks
 ## size filter, min/max diameter to count
-min.counts <- 1#.5
+min.counts <- 1.5
 max.counts <- 5
 min.norm <- min.counts
 max.norm <- max.counts
@@ -64,10 +64,8 @@ for ( i in seq_along(files) ) {
     cat(paste("parsing", comment, "\n"))
     sampleIDs[i] <- comment
 
+    ## TODO: get correct dilution
     DIL <- dil
-    if ( length(grep("UNDILUTED",sampleIDs[i]))>0 )
-        DIL <- undil
-    ## TODO: search correct dilution
 
     ## pre-caculated values
     cvalues[i,] <- as.numeric(trimws(data[match(colnames(cvalues),data[,1]),2]))
@@ -105,14 +103,6 @@ sizes <- sizes[,filter]
 sampleIDs <- sampleIDs[filter]
 times <-times[filter]
 cvalues <- cvalues[filter,]
-
-## TODO:
-## * split into experiments (simple: set ID above and run script separately),
-## * handle duplicates: average of all values
-
-## fix known sample issues
-## sample 08 is indexed as 20110116_18_15
-sampleIDs <- sub("20110116_18_15", "08", sampleIDs)
 
 sampleLabels <- sub("^EXP","",sampleIDs)
 sampleLabels <- sub("^1_","",sampleLabels)
@@ -247,7 +237,8 @@ for ( i in 1:length(RUNS) ) {
          xlim=par("usr")[1:2],pch=5,lwd=1)
 #lines(1:ncol(cnts), volume,col="white")
     axis(2,col="black",col.axis="black",line=par("mgp")[1]*2)
-    mtext(expression("total cell volume, "*mu*L/mL),2, 3*par("mgp")[1],col="black")
+    mtext(expression("total cell volume, "*mu*L/mL),2,
+          3*par("mgp")[1],col="black")
     legend("topleft",c("cell count","total cell volume"),pch=c(1,5),
            col=c("red","white"),bty="n",text.col="white",pt.lwd=c(1,1))
     dev.off()
@@ -278,7 +269,7 @@ for ( i in 1:length(RUNS) ) {
                           `cells/mL`=total[rid],
                           `volume,uL/mL`=volume[rid],
                           check.names=FALSE)
-    summary <- cbind.data.frame(summary, cvalues)
+    summary <- cbind.data.frame(summary, cvalues[rid,])
     write.table(summary, file=paste0(file.name,"_summary.tsv"),
             quote=FALSE,sep="\t",row.names=FALSE)
 }
