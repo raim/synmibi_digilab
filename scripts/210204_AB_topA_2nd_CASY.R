@@ -246,13 +246,14 @@ for ( i in 1:length(RUNS) ) {
     sample.cols <- rev(viridis::viridis(ncol(cnts)))
 
     png(paste0(file.name,"_diameter_raw.png"), 
-        width=2*3.5, height=3.5, units="in", res=300)
-    par(mai=c(.5,.5,.1,.1),mgp=c(1.3,.4,0),tcl=-.25,xaxs="i",yaxs="i")
-    matplot(size, cnts,type="l",lty=1,xlim=c(0,5),
+        width=4, height=4/2, units="in", res=300)
+    par(mai=c(.4,.5,.1,.1),mgp=c(1.2,.3,0),tcl=-.25,xaxs="i",yaxs="i")
+    matplot(size, cnts/1e7,type="l",lty=1,xlim=c(0,5),
+            ylab=expression(10^7~cells/mL),
             col=sample.cols,xlab=expression("cell diameter, "*mu*m),
-            ylim=c(0,1.5e7))
+            ylim=c(0,1.5))
     legend("topright", sampleLabels[rid], col=sample.cols,
-           lty=1,y.intersp=.6,cex=.6,bty="n",
+           lty=1,y.intersp=.6,cex=1,bty="n",
            ncol=max(c(1,round(length(sampleLabels[rid])/20))))
     dev.off()
     
