@@ -25,6 +25,10 @@ cat(paste("PARSING CASY DATA:", date(), "\n"))
 ## experiment parameters
 dil <- 3000
 
+## override with custom dilutions per experiment
+dils <- list()
+dils$`SAMPLE3_06+` <-6000
+
 ## evc und topA KD war glaub ich immer 1:5000 verdünnt
 ## die anderen haben wir zunächst nur 1:1000 verdünnt,
 ## sobald die recovered sind dann auch 1:5000
@@ -67,7 +71,12 @@ for ( i in seq_along(files) ) {
 
     ## TODO: get correct dilution
     DIL <- dil
-
+    ## search experiment ID in custom dilutions
+    if ( comment %in% names(dils) ) {
+        DIL <- dils[[comment]]
+        cat(paste("\tusing custom dilution", DIL, "\n"))
+    }
+    
     ## pre-caculated values
     cvalues[i,] <- as.numeric(trimws(data[match(colnames(cvalues),data[,1]),2]))
     cvalues[i,c("Counts/ml","Volume/ml")] <-
