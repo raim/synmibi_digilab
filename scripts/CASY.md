@@ -1,3 +1,8 @@
+
+Manual, page 116:
+
+11.3 Calculating the Numerical Measuring Results" 
+
 The CASY System calculates all values expressed in milliliters as a concentration
 of counts or volume in the undiluted, original sample. Therefore, the number of
 measuring cycles, the nominal measuring volume (200 or 400 μl), the dilution factor,
